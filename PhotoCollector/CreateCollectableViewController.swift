@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 class CreateCollectableViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
@@ -22,7 +23,10 @@ class CreateCollectableViewController: UIViewController, UIImagePickerController
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        
+        if let image = info[.originalImage] as? UIImage{
+            imageView.image = image
+        }
+        pickerController.dismiss(animated: true, completion: nil)
     }
     @IBAction func mediaFolderTapped(_ sender: UIBarButtonItem) {
         pickerController.sourceType = .photoLibrary
@@ -33,6 +37,14 @@ class CreateCollectableViewController: UIViewController, UIImagePickerController
         present(pickerController, animated: true, completion: nil)
     }
     @IBAction func addButtonTpped(_ sender: UIButton) {
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let context = appDelegate.persistentContainer.viewContext
+        let entity = NSEntityDescription.entity(forEntityName: "Collectable", in: context)!
+        let newCollecable = NSManagedObject(entity: entity, insertInto: context)
+        newCollecable.setValue(textField.text, forKey: "title")
+        newCollecable.setValue(imageView.image?.jpegData(compressionQuality: 1.0), forKey: "image")
+        appDelegate.saveContext()
+        navigationController?.popViewController(animated: true)
     }
     
 
