@@ -53,5 +53,38 @@ class CollectableTableViewController: UITableViewController {
 
         return cell
     }
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        
+        if editingStyle == .delete{
+            
+            let title = collectablesTitle[indexPath.row]
+            let imageData = collectablesData[indexPath.row]
+            
+            let appDelegate = UIApplication.shared.delegate as! AppDelegate
+            let context = appDelegate.persistentContainer.viewContext
+            
+            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Collectable")
+            do{
+                let result = try context.fetch(request)
+                for data in result as! [NSManagedObject]{
+                    if(data.value(forKey: "title") as! String == title && data.value(forKey: "image") as! Data == imageData){
+                        context.delete(data)
+                    }
+                }
+                
+            }
+            catch{
+                print("Failed")
+            }
+            
+            appDelegate.saveContext()
+            getCollectables()
+            
+        }
+    }
     
 }
